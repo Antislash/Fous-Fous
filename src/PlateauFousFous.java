@@ -45,6 +45,7 @@ public class PlateauFousFous implements Partie1 {
 			
 			String ligne;
 			while ((ligne=br.readLine())!=null){
+				if(!((ligne.charAt(0) + "").equals("%")))
 				file+=ligne;
 			}
 			br.close();
@@ -146,7 +147,7 @@ public class PlateauFousFous implements Partie1 {
 			if(b && r) break;
 		}
 		
-		return false;
+		return !(b && r);
 	}
 	
 	public static boolean isNumeric(String str)
