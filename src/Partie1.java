@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 
 public interface Partie1 {
 	/**
@@ -14,7 +15,7 @@ public interface Partie1 {
 	
 	public boolean estValide(String move, String player);
 	
-	public String[] mouvementsPossibles(String player);
+	public ArrayList<String> mouvementsPossibles(String player);
 	
 	public void play(String move, String player);
 	

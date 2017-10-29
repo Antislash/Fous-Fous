@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class PlateauFousFous implements Partie1 {
@@ -22,6 +23,7 @@ public class PlateauFousFous implements Partie1 {
 		joueurCourant = !joueurCourant;
 	}
 
+	//Enumération pour les joueurs
 	private enum Player{
 			r("r"),b("b"),v("-");
 		
@@ -36,6 +38,7 @@ public class PlateauFousFous implements Partie1 {
 			}
 	}
 	
+	//Plateau de jeu
 	private Player plateau[][] = new Player[TAILLE][TAILLE];
 	
 	@Override
@@ -128,15 +131,128 @@ public class PlateauFousFous implements Partie1 {
 	@Override
 	public boolean estValide(String move, String player) {
 		// TODO Auto-generated method stub
-		return false;
+		
+		ArrayList<String> coupsPossible = mouvementsPossibles(player);
+		
+		return coupsPossible.contains(move);
 	}
 
 	@Override
-	public String[] mouvementsPossibles(String player) {
+	public ArrayList<String> mouvementsPossibles(String player) {
 		// TODO Auto-generated method stub
-		return null;
+		boolean prise1 = false, prise2 = false, prise3 = false, prise4 = false; //Servira à savoir si le pion courant peut faire au moins une prise
+		String adversaire = player == "r" ? "b" : "r";
+		
+		ArrayList<String> coupsPossible = new ArrayList<String>();
+		
+		//Pour chaque pion on regarde si ils peuvent d'abord faire des prises et cb ou sinon si ils peuvent faire des menaces
+		for(int i = 0; i < TAILLE; i ++){
+			for(int j = 0; j < TAILLE; j++){
+				if(plateau[i][j].toString().equals(player)){
+					
+					/**
+					 * On regarde d'abord pour les prises
+					 */
+					int abs = j, ord = i;
+					
+					//i++ et j--					
+					prise1 = cherchePionEnnemi(abs-1,ord+1, -1, +1, player, adversaire, true, coupsPossible, i, j);
+
+					//i++ et j++
+					prise2 = cherchePionEnnemi(abs+1,ord+1, +1, +1, player, adversaire, true, coupsPossible, i, j);
+
+					//i-- et j++
+					prise3 = cherchePionEnnemi(abs+1,ord-1, +1, -1, player, adversaire, true, coupsPossible, i, j);
+					
+					//i-- et j--
+					prise4 = cherchePionEnnemi(abs-1,ord-1, -1, -1, player, adversaire, true, coupsPossible, i, j);
+					
+					/**
+					 * FIN de vérification pour les prises
+					 */
+					
+					//Si le pion ne peut faire aucune prise on regarde si il peut faire une menace
+					if(!prise1 && !prise2 && !prise3 && !prise4){
+						//On vérifie sur chaque diagonales si on peut menacer un pion ennemi
+						
+						abs = j-1; ord = i+1;
+						//Diagonale i++ et j--
+						while(abs >= 0 && ord < TAILLE && plateau[ord][abs] == Player.v){
+							//On regarde si on menace un pion dans une des 4 diagonales
+							if(cherchePionEnnemi(abs,ord, -1, +1, player, adversaire, false, null, i, j) || 
+									cherchePionEnnemi(abs,ord, +1, +1, player, adversaire, false, null, i, j) ||
+									cherchePionEnnemi(abs,ord, +1, -1, player, adversaire, false, null, i, j) ||
+									cherchePionEnnemi(abs,ord, -1, -1, player, adversaire, false, null, i, j)){
+								coupsPossible.add(changeChiffreParLettre(j)+i+"-"+changeChiffreParLettre(abs)+ord);
+							}
+							abs--; ord++;
+						}
+
+						//Diagonale i++ et j++
+						abs = j+1; ord = i+1;
+						while(abs < TAILLE && ord < TAILLE && plateau[ord][abs] == Player.v){
+							//On regarde si on menace un pion dans une des 4 diagonales
+							if(cherchePionEnnemi(abs,ord, -1, +1, player, adversaire, false, null, i, j) || 
+									cherchePionEnnemi(abs,ord, +1, +1, player, adversaire, false, null, i, j) ||
+									cherchePionEnnemi(abs,ord, +1, -1, player, adversaire, false, null, i, j) ||
+									cherchePionEnnemi(abs,ord, -1, -1, player, adversaire, false, null, i, j)){
+								coupsPossible.add(changeChiffreParLettre(j)+i+"-"+changeChiffreParLettre(abs)+ord);
+							}
+
+							abs++; ord++;
+						}
+
+						//Diagonale i-- et j++
+						abs = j+1; ord = i-1;
+						while(abs < TAILLE && ord >= 0 && plateau[ord][abs] == Player.v){
+							
+							//On regarde si on menace un pion dans une des 4 diagonales
+							if(cherchePionEnnemi(abs,ord, -1, +1, player, adversaire, false, null, i, j) || 
+									cherchePionEnnemi(abs,ord, +1, +1, player, adversaire, false, null, i, j) ||
+									cherchePionEnnemi(abs,ord, +1, -1, player, adversaire, false, null, i, j) ||
+									cherchePionEnnemi(abs,ord, -1, -1, player, adversaire, false, null, i, j)){
+								coupsPossible.add(changeChiffreParLettre(j)+i+"-"+changeChiffreParLettre(abs)+ord);
+							}
+							abs++; ord--;
+						}
+						
+						//Diagonale i-- et j--
+						abs = j-1; ord = i-1;
+						while(abs >= 0 && ord >= 0 && plateau[ord][abs] == Player.v){
+							
+							//On regarde si on menace un pion dans une des 4 diagonales
+							if(cherchePionEnnemi(abs,ord, -1, +1, player, adversaire, false, null, i, j) || 
+									cherchePionEnnemi(abs,ord, +1, +1, player, adversaire, false, null, i, j) ||
+									cherchePionEnnemi(abs,ord, +1, -1, player, adversaire, false, null, i, j) ||
+									cherchePionEnnemi(abs,ord, -1, -1, player, adversaire, false, null, i, j)){
+								coupsPossible.add(changeChiffreParLettre(j)+i+"-"+changeChiffreParLettre(abs)+ord);
+							}
+							abs--; ord--;
+						}
+					}
+				}
+			}
+		}
+		
+		
+		return coupsPossible;
 	}
 
+	//Fonction récursive pour trouver les coups valides
+	private boolean cherchePionEnnemi(int abs, int ord, int depX, int depY, String player, String adversaire, boolean ajouterArrayList, ArrayList<String> coups, int i, int j){
+		
+		if(ord >= plateau.length || ord < 0 || abs >= plateau.length || abs < 0) return false;
+		if(plateau[ord][abs].toString().equals(player)) return false;
+		if(plateau[ord][abs].toString().equals(adversaire)) {
+			if(ajouterArrayList){
+				coups.add(changeChiffreParLettre(j)+i+"-"+changeChiffreParLettre(abs)+ord);
+			}
+			return true;
+		}
+		
+		return cherchePionEnnemi(abs + depX, ord + depY, depX, depY, player, adversaire, ajouterArrayList, coups, i, j);
+	}
+	
 	@Override
 	public void play(String move, String player) {
 		// TODO Auto-generated method stub
@@ -147,7 +263,8 @@ public class PlateauFousFous implements Partie1 {
 		if(pLettre != -1 && sLettre != -1 && isNumeric(""+move.charAt(1)) && isNumeric(""+move.charAt(4))){
 			
 			//On déplace les pions
-			plateau[sLettre][Integer.parseInt(move.charAt(4) + "")] = plateau[pLettre][Integer.parseInt(move.charAt(1) + "")];
+			plateau[Integer.parseInt(move.charAt(4) + "")][sLettre] = plateau[ Integer.parseInt(move.charAt(1) + "")][ pLettre];
+			plateau[ Integer.parseInt(move.charAt(1) + "")][ pLettre]= Player.v;
 			
 			//Fin du tour on change de joueur
 			changeJoueurCourant();
@@ -172,6 +289,24 @@ public class PlateauFousFous implements Partie1 {
 		return i;
 	}
 	
+	private String changeChiffreParLettre(int nb){
+		String caract = "";
+		
+		switch(nb){
+		case 0 : caract = "A"; break;
+		case 1 : caract = "B"; break;
+		case 2 : caract = "C"; break;
+		case 3 : caract = "D"; break;
+		case 4 : caract = "E"; break;
+		case 5 : caract = "F"; break;
+		case 6 : caract = "G"; break;
+		case 7 : caract = "H"; break;
+		default : caract = ""; break;
+		}
+		
+		return caract;
+	}
+	
 	@Override
 	public boolean finDePartie() {
 		// TODO Auto-generated method stub
@@ -188,7 +323,7 @@ public class PlateauFousFous implements Partie1 {
 			if(b && r) break;
 		}
 		
-		return !(b && r);
+		return !(b || r);
 	}
 	
 	public static boolean isNumeric(String str)
@@ -196,10 +331,13 @@ public class PlateauFousFous implements Partie1 {
 	  return str.matches("-?\\d+(\\.\\d+)?");  //match a number with optional '-' and decimal.
 	}
 	
+	//Affichage de la map
 	public void showMap(){
+		System.out.println("   A B C D E F G H");
 		for(int i = 0; i < TAILLE; i++){
+			System.out.print(i + "|");
 			for(int j = 0; j < TAILLE; j++){
-				System.out.print(plateau[i][j]);
+				System.out.print(" " + plateau[i][j]);
 			}
 			
 			System.out.println();
@@ -229,15 +367,17 @@ public class PlateauFousFous implements Partie1 {
 						   p.setFromFile(str);
 						   break;
 				case "2" : System.out.println("Chargement d'un terrain classique");
-						   p.saveToFile("out.txt");
+						   p.setFromFile("test.txt");
 						   break;
 			}
 			
 			while(!p.finDePartie()){
+				p.showMap();
+				e = p.getJoueurCourant() ? Player.b : Player.r;
+				p.showMouvementPossible(e.toString());
 				do
 				{
-					e = p.getJoueurCourant() ? Player.b : Player.r;
-					System.out.println("Joueur " + e + "quel cout voulez vous jouez :");
+					System.out.println("Joueur " + e + " quel coup voulez vous jouez (exemple A0-B5) :");
 					str = sc.nextLine();
 				}while(!p.estValide(str,e.toString()));
 				
@@ -249,4 +389,12 @@ public class PlateauFousFous implements Partie1 {
 		}
 	}
 
+	//Fonction de test interne
+	public void showMouvementPossible(String player){
+		ArrayList<String> test = mouvementsPossibles(player);
+		
+		for(String t : test){
+			System.out.print(t+ " / ");
+		}
+	}
 }
